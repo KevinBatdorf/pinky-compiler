@@ -95,4 +95,4 @@ All major types are exported:
 import type { AST, Token, CompilerErrorType, ParseErrorType, TokenErrorType, RunFunction } from "pinky-compiler";
 ```
 
-Additionally, you can import the syntax types listed [here](https://github.com/kevinbatdorf/pinky-compiler/src/syntax.ts).
+Additionally, you can import the syntax types listed [here](https://github.com/KevinBatdorf/pinky-compiler/blob/main/src/index.ts).
