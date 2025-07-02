@@ -16,10 +16,12 @@ jobs:
         with:
           cache: npm
 
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run format
-      - run: npm run test
+      - run: |
+            npm ci
+            npm run lint
+            npm run format
+            npm run test
+            npm run build
 
   release:
     name: Release & Publish
@@ -48,6 +50,8 @@ jobs:
           git commit -am "chore: bump version to ${GITHUB_REF#refs/tags/}"
           git push origin HEAD:main
 
-      - run: npm publish
+      - run: |
+            npm run build
+            npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

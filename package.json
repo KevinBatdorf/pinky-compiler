@@ -4,7 +4,13 @@
 	"description": "A compiler for the pinky scripting language",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
+	"files": [
+		"dist",
+		"LICENSE",
+		"README.md"
+	],
 	"scripts": {
+		"build": "tsc",
 		"lint": "biome lint --write",
 		"format": "biome format --write",
 		"test": "vitest"
@@ -31,7 +37,6 @@
 		"@biomejs/biome": "^2.0.6",
 		"@types/node": "^24.0.10",
 		"@vitest/ui": "^3.2.4",
-		"tsx": "^4.20.3",
 		"typescript": "^5.8.3",
 		"vitest": "^3.2.4"
 	}

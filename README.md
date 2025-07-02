@@ -1,3 +1,7 @@
+[![Release](https://github.com/KevinBatdorf/pinky-compiler/actions/workflows/release.yml/badge.svg)](https://github.com/KevinBatdorf/pinky-compiler/actions/workflows/release.yml)
+[![npm version](https://img.shields.io/npm/v/pinky-compiler.svg)](https://www.npmjs.com/package/pinky-compiler)
+[![npm downloads](https://img.shields.io/npm/dm/pinky-compiler.svg)](https://www.npmjs.com/package/pinky-compiler)
+
 # Pinky Compiler
 
 A fast, embeddable compiler for the Pinky scripting language.
