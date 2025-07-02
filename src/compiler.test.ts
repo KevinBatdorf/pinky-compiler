@@ -1,14 +1,13 @@
 import { beforeAll, expect, test } from "vitest";
-import { compile } from "./compiler";
-import { tokenize } from "./lexer";
-import { parse } from "./parser";
-import { loadWasm, type RunFunction } from "./compiler/exports";
+import { compile, init, parse, tokenize } from ".";
+import type { RunFunction } from "./compiler/exports";
+
 declare global {
 	var run: RunFunction;
 }
 
 beforeAll(async () => {
-	const { run } = await loadWasm();
+	const { run } = await init();
 	globalThis.run = run;
 });
 

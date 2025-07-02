@@ -66,28 +66,26 @@ export const loadWasm = async (): Promise<{ run: RunFunction }> => {
 			return base ** exp;
 		},
 	};
-
-	return {
-		run: (bytes: Uint8Array): string[] => {
-			output.length = 0; // clear previous output
-			const program = new WebAssembly.Module(bytes);
-			const instance = new WebAssembly.Instance(program, {
-				env,
-			});
-			memory = instance.exports.memory as WebAssembly.Memory;
-			try {
-				(instance.exports.main as () => void)();
-			} catch (e) {
-				console.error("Runtime error:", e);
-				let msg = e instanceof Error ? e.message : String(e);
-				if (msg === "unreachable") {
-					msg = "Unreachable code found. Infinite loop?";
-				}
-				return [`RuntimeError: ${msg}`];
+	const run = (bytes: Uint8Array): string[] => {
+		output.length = 0; // clear previous output
+		const program = new WebAssembly.Module(bytes);
+		const instance = new WebAssembly.Instance(program, {
+			env,
+		});
+		memory = instance.exports.memory as WebAssembly.Memory;
+		try {
+			(instance.exports.main as () => void)();
+		} catch (e) {
+			console.error("Runtime error:", e);
+			let msg = e instanceof Error ? e.message : String(e);
+			if (msg === "unreachable") {
+				msg = "Unreachable code found. Infinite loop?";
 			}
-			return [...output];
-		},
+			return [`RuntimeError: ${msg}`];
+		}
+		return [...output];
 	};
+	return { run };
 };
 
 const boxString = (str: string, memory: WebAssembly.Memory): number => {

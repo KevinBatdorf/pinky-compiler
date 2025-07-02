@@ -1,4 +1,5 @@
-import { test, expect } from "vitest";
+import { expect, test } from "vitest";
+import { tokenize } from ".";
 import {
 	advance,
 	decodeStringLiteralSegment,
@@ -11,7 +12,6 @@ import {
 	lookahead,
 	match,
 	peek,
-	tokenize,
 } from "./lexer";
 
 test("isAlpha", () => {

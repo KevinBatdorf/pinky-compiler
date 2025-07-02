@@ -1,16 +1,15 @@
 import { expect, test } from "vitest";
+import { parse, tokenize } from ".";
 import {
 	advance,
 	expectNext,
 	isEOF,
 	isNextToken,
 	match,
-	parse,
 	peek,
 	previousToken,
 } from "./parser";
 import type { Token } from "./tokens";
-import { tokenize } from "./lexer";
 
 // Helpers
 test("peek returns current token", () => {

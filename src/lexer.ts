@@ -102,6 +102,9 @@ export const decodeStringLiteralSegment = (
 	};
 };
 
+/**
+ * Tokenizes Pinky source code into tokens.
+ */
 export const tokenize = (
 	src: string,
 ): { tokens: Token[]; error: TokenErrorType | null } => {
