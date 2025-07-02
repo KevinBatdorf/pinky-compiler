@@ -92,5 +92,7 @@ run(bytes);
 All major types are exported:
 
 ```ts
-import type { AST, Token, CompilerErrorType, ParseErrorType, TokenErrorType } from "pinky-compiler";
+import type { AST, Token, CompilerErrorType, ParseErrorType, TokenErrorType, RunFunction } from "pinky-compiler";
 ```
+
+Additionally, you can import the syntax types listed [here](https://github.com/kevinbatdorf/pinky-compiler/src/syntax.ts).

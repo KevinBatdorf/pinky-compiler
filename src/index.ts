@@ -5,9 +5,10 @@ import { parse } from "./parser";
 
 export type { CompilerErrorType } from "./compiler";
 export { compile } from "./compiler";
+export type { RunFunction } from "./compiler/exports";
 export { loadWasm } from "./compiler/exports";
-export { tokenize } from "./lexer";
 export type { TokenErrorType } from "./lexer";
+export { tokenize } from "./lexer";
 export type { AST, ParseErrorType } from "./parser";
 export { parse } from "./parser";
 export * from "./syntax";
