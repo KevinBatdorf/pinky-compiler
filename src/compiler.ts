@@ -45,7 +45,7 @@ import {
 import type { AST } from "./parser";
 import type { Expression, Statement } from "./syntax";
 
-class CompilerError extends Error {
+export class CompilerError extends Error {
 	line: number;
 	column: number;
 	tokenLength: number;

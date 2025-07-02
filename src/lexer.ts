@@ -1,10 +1,16 @@
 import { keywords, type Token, tokenTypes } from "./tokens";
 
-export type TokenErrorType = null | {
+export class TokenError extends Error {
 	line: number;
 	column: number;
-	message: string;
-};
+	constructor(message: string, line: number, column: number) {
+		super(message);
+		this.name = "TokenError";
+		this.line = line;
+		this.column = column;
+	}
+}
+export type TokenErrorType = null | TokenError;
 
 export const isAlpha = (char: string): boolean =>
 	(char >= "a" && char <= "z") || (char >= "A" && char <= "Z") || char === "_";
@@ -125,11 +131,12 @@ export const tokenize = (
 	const errorReturn = (
 		message: string,
 		details?: { line?: number; column?: number },
-	): TokenErrorType => ({
-		message,
-		line: details?.line || pos.line,
-		column: details?.column || pos.column,
-	});
+	): TokenErrorType =>
+		new TokenError(
+			message,
+			details?.line || pos.line,
+			details?.column || pos.column,
+		);
 
 	while (!isEndOfFile(peek(src, pos.current))) {
 		const ch = peek(src, pos.current);

@@ -89,10 +89,18 @@ run(bytes);
 
 ## Types
 
-All major types are exported:
+All error classes and major types are exported:
 
 ```ts
-import type { AST, Token, CompilerErrorType, ParseErrorType, TokenErrorType, RunFunction } from "pinky-compiler";
+import type {
+    CompilerError,
+    ParseError,
+    TokenError,
+    type AST,
+    type Token,
+    type CompileFromSourceResult,
+    type RunFunction
+} from "pinky-compiler";
 ```
 
 Additionally, you can import the syntax types listed [here](https://github.com/KevinBatdorf/pinky-compiler/blob/main/src/index.ts).
