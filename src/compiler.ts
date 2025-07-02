@@ -12,38 +12,39 @@ import {
 	resetFunctionBodies,
 	userDefinedFunctions,
 } from "./compiler/functions";
-import type { AST } from "./parser";
 import {
 	clearScopes,
+	consumeScratchIndex,
 	createStringTable,
 	declareVar,
 	enterScope,
 	exitScope,
 	getLocalDecls,
 	getLocalVarsIndex,
-	consumeScratchIndex,
 	getVar,
-	setLocalVarsIndex,
 	scopes,
+	setLocalVarsIndex,
 	setScopes,
 } from "./compiler/state";
-import type { Expression, Statement } from "./syntax";
 import {
-	local,
-	nativeBinOps,
-	valType,
-	emitSection,
-	unsignedLEB,
-	encodeString,
-	i32,
-	f64,
-	control,
-	fn,
 	block,
-	loop,
+	control,
+	emitSection,
+	encodeString,
+	f64,
+	fn,
+	i32,
 	if_,
+	local,
+	loop,
 	misc,
+	nativeBinOps,
+	unsignedLEB,
+	valType,
 } from "./compiler/wasm";
+import type { AST } from "./parser";
+import type { Expression, Statement } from "./syntax";
+
 class CompilerError extends Error {
 	line: number;
 	column: number;
@@ -140,11 +141,10 @@ const _compile = (
 	// Type section for all functions
 	const typeSection = emitSection(
 		1,
-		// biome-ignore format:
 		new Uint8Array([
-            ...unsignedLEB(functionTypes.length), // number of types
-            ...functionTypes.flat(), // all type entries defined at the top
-        ]),
+			...unsignedLEB(functionTypes.length), // number of types
+			...functionTypes.flat(), // all type entries defined at the top
+		]),
 	);
 
 	// Import section (import print/println from env)
@@ -353,11 +353,11 @@ const compileStatement = (
 
 			const counterIndex = consumeScratchIndex();
 
-			// biome-ignore format:
+			// biome-ignore format: keep loop structure
 			return [
-                // Start counter at 0
-                ...i32.const(0),
-                ...local.set(counterIndex),
+				// Start counter at 0
+				...i32.const(0),
+				...local.set(counterIndex),
 				...block.start(),
                 ...loop.start(),
                     // check if we reached max iterations
@@ -378,9 +378,9 @@ const compileStatement = (
                     ...loop.br_if(1), // break out of outer block
 
                     ...body,
-                    ...loop.br(0), // loop back
-                ...loop.end(),
-                ...block.end(),
+				    ...loop.br(0), // loop back
+				...loop.end(),
+				...block.end(),
 			];
 		}
 		case "ForStatement": {
@@ -406,21 +406,21 @@ const compileStatement = (
 			exitScope();
 			const isDescending = consumeScratchIndex();
 			const counterIndex = consumeScratchIndex();
-			// biome-ignore format:
+			// biome-ignore format: keep loop structure
 			return [
-                // Start counter at 0
-                ...i32.const(0),
-                ...local.set(counterIndex),
+				// Start counter at 0
+				...i32.const(0),
+				...local.set(counterIndex),
 
-                ...init, // e.g. i := 0
-                ...step,
-                ...fn.call(func().unbox_number),
-                ...f64.const(0),
-                ...f64.lt(), // step < 0 ?
-                ...local.set(isDescending),
+				...init, // e.g. i := 0
+				...step,
+				...fn.call(func().unbox_number),
+				...f64.const(0),
+				...f64.lt(), // step < 0 ?
+				...local.set(isDescending),
 
-                ...block.start(),
-                ...loop.start(),
+				...block.start(),
+				...loop.start(),
                     // check if we reached max iterations
                     ...local.get(counterIndex),
                     ...i32.const(MAX_ITERATIONS),
@@ -461,9 +461,9 @@ const compileStatement = (
                     ...local.set(loopVar.index),
 
                     ...loop.br(0), // loop back
-                ...loop.end(),
-                ...block.end(),
-            ];
+				...loop.end(),
+				...block.end(),
+			];
 		}
 		case "FunctionDeclStatement": {
 			const { name, params, body } = stmt;
@@ -559,18 +559,18 @@ const compileExpression = (
 			const nativeOp = nativeBinOps[expr.operator];
 			// Special handling of + for string concatenation
 			if (nativeOp && expr.operator === "+") {
-				// biome-ignore format:
+				// biome-ignore format: keep if structure
 				return [
-                    ...left,
-                    ...fn.call(func().is_string),
-                    ...right,
-                    ...fn.call(func().is_string),
-                    ...i32.or(), // is_string(left) || is_string(right)
-                    ...if_.start(valType("i32")),
+					...left,
+					...fn.call(func().is_string),
+					...right,
+					...fn.call(func().is_string),
+					...i32.or(), // is_string(left) || is_string(right)
+					...if_.start(valType("i32")),
                         ...left,
                         ...right,
                         ...fn.call(func().concat),
-                    ...if_.else(),
+					...if_.else(),
                         ...left,
                         ...fn.call(func().is_bool),
                         ...right,
@@ -594,7 +594,7 @@ const compileExpression = (
                             ...fn.call(func().box_number),
                         ...if_.end(), // bool
                     ...if_.end(), // string
-                ];
+	            ];
 			}
 
 			// Native operators supported for f64
@@ -636,33 +636,33 @@ const compileExpression = (
 					];
 				case "and": {
 					const scratch = consumeScratchIndex();
-					// biome-ignore format:
+					// biome-ignore format: keep if structure
 					return [
-                        ...left, // evaluate A
-                        ...local.set(scratch),
-                        ...local.get(scratch),
-                        ...fn.call(func().is_truthy),
-                        ...if_.start(valType("i32")),
-                            ...right, // evaluate and return B
-                        ...if_.else(),
-                            ...local.get(scratch), // return A
-                        ...if_.end(),
-                    ];
+						...left, // evaluate A
+						...local.set(scratch),
+						...local.get(scratch),
+						...fn.call(func().is_truthy),
+						...if_.start(valType("i32")),
+						    ...right, // evaluate and return B
+						...if_.else(),
+						    ...local.get(scratch), // return A
+						...if_.end(),
+					];
 				}
 				case "or": {
 					const scratch = consumeScratchIndex();
-					// biome-ignore format:
+					// biome-ignore format: keep if structure
 					return [
-                        ...left, // evaluate A
-                        ...local.set(scratch),
-                        ...local.get(scratch),
-                        ...fn.call(func().is_truthy),
-                        ...if_.start(valType("i32")),
-                            ...local.get(scratch), //return A
-                        ...if_.else(),
-                            ...right, // evaluate and return B
-                        ...if_.end(),
-                    ];
+						...left, // evaluate A
+						...local.set(scratch),
+						...local.get(scratch),
+						...fn.call(func().is_truthy),
+						...if_.start(valType("i32")),
+						    ...local.get(scratch), //return A
+						...if_.else(),
+						    ...right, // evaluate and return B
+						...if_.end(),
+					];
 				}
 				default:
 					throw new Error(`Unsupported binary operator: ${expr.operator}`);

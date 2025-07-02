@@ -1,11 +1,11 @@
 import {
 	BINARY_OPERATORS,
-	UNARY_OPERATORS,
 	type BinaryOperator,
 	type Expression,
 	type Identifier,
 	type Program,
 	type Statement,
+	UNARY_OPERATORS,
 	type UnaryOperator,
 } from "./syntax";
 import { symbolForTokenType, type Token, type TokenType } from "./tokens";

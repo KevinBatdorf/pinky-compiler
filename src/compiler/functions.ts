@@ -1,16 +1,16 @@
 import {
-	if_,
-	fn,
-	i32,
-	f64,
-	local,
-	unsignedLEB,
-	valType,
 	block,
-	loop,
+	f64,
+	fn,
 	global,
+	i32,
+	if_,
+	local,
+	loop,
 	memory,
 	misc,
+	unsignedLEB,
+	valType,
 } from "./wasm";
 
 // Set up function signatures
@@ -117,19 +117,18 @@ export const getFunctionReturnCount = (name: string): number => {
 	return fn.type.results.length;
 };
 
-// biome-ignore format:
 // js/lua style modulus
 const modFunctionBody = [
-    ...local.declare(),
-    ...local.get(0),    // 0 (left)
-    ...local.get(1),    // 1 (right)
-    ...local.get(0),    // 0 (left)
-    ...local.get(1),    // 1 (right)
-    ...f64.div(),
-    ...f64.trunc(), // trunc to integer
-    ...f64.mul(),   // multiply by right
-    ...f64.sub(),   // subtract -> yields a - b * floor(a/b)
-    ...fn.end(),
+	...local.declare(),
+	...local.get(0), // 0 (left)
+	...local.get(1), // 1 (right)
+	...local.get(0), // 0 (left)
+	...local.get(1), // 1 (right)
+	...f64.div(),
+	...f64.trunc(), // trunc to integer
+	...f64.mul(), // multiply by right
+	...f64.sub(), // subtract -> yields a - b * floor(a/b)
+	...fn.end(),
 ];
 
 const isStringFunctionBody: number[] = [
@@ -152,15 +151,15 @@ const isBooleanFunctionBody: number[] = [
 	...fn.end(),
 ];
 
-// biome-ignore format:
+// biome-ignore format: keep loop structure
 const memoryCopyFunctionBody: number[] = [
 	// params: from (0), to (1), len (2)
 	...local.declare("i32", "i32"), // i, current byte
-    ...i32.const(0), // i = 0
-    ...local.set(3),
+	...i32.const(0), // i = 0
+	...local.set(3),
 
-    ...block.start(),
-    ...loop.start(),
+	...block.start(),
+	...loop.start(),
         ...local.get(3),
         ...local.get(2),
         ...i32.ge_s(), // i >= len ?
@@ -184,10 +183,11 @@ const memoryCopyFunctionBody: number[] = [
         ...local.set(3), // i++
 
         ...loop.br(0), // loop back
-    ...loop.end(),
-    ...block.end(),
-    ...fn.end()
+	...loop.end(),
+	...block.end(),
+	...fn.end(),
 ];
+
 const concatFunctionBody: number[] = [
 	// incoming params: left (0), right (1) - i32 boxed unknowns
 	...local.declare("i32", "i32", "i32", "i32", "i32"),
@@ -269,45 +269,45 @@ const concatFunctionBody: number[] = [
 	...fn.end(),
 ];
 
-// biome-ignore format:
+// biome-ignore format: keep if structure
 const toNumberFunctionBody: number[] = [
-    // incoming param: a pointer to a boxed value
+	// incoming param: a pointer to a boxed value
 	...local.declare(),
 	...local.get(0),
 	...i32.load(0), // load tag
 
 	...i32.const(1),
 	...i32.eq(),
-    // tag == 1 (number)?
+	// tag == 1 (number)?
 	...if_.start(valType("f64")),
         ...local.get(0),
         ...i32.const(8),
         ...i32.add(),
         ...f64.load(0),
 	...if_.else(),
-	    ...local.get(0),
-	    ...i32.load(0), // reload tag
-	    ...i32.const(3),
-	    ...i32.eq(),
+        ...local.get(0),
+        ...i32.load(0), // reload tag
+        ...i32.const(3),
+        ...i32.eq(),
         // tag == 3 (bool)?
-	    ...if_.start(valType("f64")),
-	        ...local.get(0),
-	        ...i32.const(4),
-	        ...i32.add(),
-	        ...i32.load(0),
-	        ...f64.convert_i32_s(),
-	    ...if_.else(),
-	        ...local.get(0),
-	        ...i32.load(0), // reload tag
-	        ...i32.const(2),
-	        ...i32.eq(),
+        ...if_.start(valType("f64")),
+            ...local.get(0),
+            ...i32.const(4),
+            ...i32.add(),
+            ...i32.load(0),
+            ...f64.convert_i32_s(),
+        ...if_.else(),
+            ...local.get(0),
+            ...i32.load(0), // reload tag
+            ...i32.const(2),
+            ...i32.eq(),
             // tag == 2 (string)?
-	        ...if_.start(valType("f64")),
-	            // strings → NaN
-	            ...f64.const(Number.NaN),
-	        ...if_.else(),
-	            // tag == 0 (nil)
-	            ...f64.const(0),
+            ...if_.start(valType("f64")),
+                // strings → NaN
+                ...f64.const(Number.NaN),
+            ...if_.else(),
+                // tag == 0 (null)
+                ...f64.const(0),
 	        ...if_.end(), // string
 	    ...if_.end(), // bool
 	...if_.end(), // number
@@ -315,45 +315,56 @@ const toNumberFunctionBody: number[] = [
 	...fn.end(),
 ];
 
-// biome-ignore format:
+// biome-ignore format: keep if structure
 const isTruthyFunctionBody: number[] = [
-    // incoming param: a pointer to a boxed value
-    ...local.declare(),
-    ...local.get(0), // load tag
-    ...i32.load(0),
+	// incoming param: a pointer to a boxed value
+	...local.declare(),
+	...local.get(0), // load tag
+	...i32.load(0),
 
-    // if tag == 1 (number)
-    ...i32.const(1), ...i32.eq(),
-    ...if_.start(valType("i32")), // if (result i32)
-        ...local.get(0), ...i32.const(8), ...i32.add(), // offset + 8
+	// if tag == 1 (number)
+	...i32.const(1),
+	...i32.eq(),
+	...if_.start(valType("i32")), // if (result i32)
+        ...local.get(0),
+        ...i32.const(8),
+        ...i32.add(), // offset + 8
         ...f64.load(0),
         ...f64.const(0),
         ...f64.ne(), // (number != 0)
+	...if_.else(),
+        ...local.get(0),
+        ...i32.load(0), // load tag again
+        // if tag == 3 (bool)
+        ...i32.const(3),
+        ...i32.eq(),
+        ...if_.start(valType("i32")), // if (result i32)
+            ...local.get(0),
+            ...i32.const(4),
+            ...i32.add(), // offset + 4
+            ...i32.load(0),
         ...if_.else(),
-            ...local.get(0), ...i32.load(0), // load tag again
-            // if tag == 3 (bool)
-            ...i32.const(3), ...i32.eq(),
-                ...if_.start(valType("i32")), // if (result i32)
-                ...local.get(0), ...i32.const(4), ...i32.add(), // offset + 4
+            ...local.get(0),
+            ...i32.load(0), // load tag again
+            ...i32.const(2),
+            ...i32.eq(),
+            ...if_.start(valType("i32")), // if (result i32)
+                ...local.get(0),
+                ...i32.const(8),
+                ...i32.add(),
                 ...i32.load(0),
-            ...if_.else(),
-                ...local.get(0), ...i32.load(0), // load tag again
-                ...i32.const(2), ...i32.eq(),
-                ...if_.start(valType("i32")), // if (result i32)
-                    ...local.get(0), ...i32.const(8), ...i32.add(),
-                    ...i32.load(0),
-                    ...i32.const(0),
-                    ...i32.ne(), // (length > 0)
-                ...if_.else(),
-                    // falsy fallback
-                    ...i32.const(0), // return 0 (falsy)
-                ...if_.end(), // end string
-            ...if_.end(), // end bool
-        ...if_.end(), // end number
-    ...fn.end(),
+                ...i32.const(0),
+                ...i32.ne(), // (length > 0)
+	        ...if_.else(),
+                // falsy fallback
+                ...i32.const(0), // return 0 (falsy)
+	        ...if_.end(), // end string
+	    ...if_.end(), // end bool
+	...if_.end(), // end number
+	...fn.end(),
 ];
 
-// biome-ignore format:
+// biome-ignore format: keep if structure
 const ensureSpaceFunctionBody = [
 	// param: i32 sizeNeeded
 	...local.declare("i32"), // currentPtr
@@ -372,17 +383,14 @@ const ensureSpaceFunctionBody = [
 
 	...i32.gt_u(),
 	...if_.start(),
-
-		// ceil(sizeNeeded / 65536)
-		...local.get(0),
-		...i32.const(65536 - 1),
-		...i32.add(),
-		...i32.const(16),
-		...i32.shr_u(),
-
-		...memory.grow(),
-		...misc.drop(),
-
+        // ceil(sizeNeeded / 65536)
+        ...local.get(0),
+        ...i32.const(65536 - 1),
+        ...i32.add(),
+        ...i32.const(16),
+        ...i32.shr_u(),
+        ...memory.grow(),
+        ...misc.drop(),
 	...if_.end(),
 	...fn.end(),
 ];

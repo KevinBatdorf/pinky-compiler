@@ -3,13 +3,30 @@
 	"version": "1.0.0",
 	"description": "A compiler for the pinky scripting language",
 	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"scripts": {
 		"lint": "biome lint --write",
 		"format": "biome format --write",
 		"test": "vitest"
 	},
-	"author": "",
+	"author": "Kevin Batdorf",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/kevinbatdorf/pinky-compiler"
+	},
+	"bugs": {
+		"url": "https://github.com/kevinbatdorf/pinky-compiler/issues"
+	},
+	"homepage": "https://github.com/kevinbatdorf/pinky-compiler#readme",
+	"keywords": [
+		"compiler",
+		"pinky",
+		"scripting",
+		"language",
+		"typescript",
+		"wasm"
+	],
 	"devDependencies": {
 		"@biomejs/biome": "^2.0.6",
 		"@types/node": "^24.0.10",

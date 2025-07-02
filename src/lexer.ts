@@ -1,4 +1,4 @@
-import { type Token, keywords, tokenTypes } from "./tokens";
+import { keywords, type Token, tokenTypes } from "./tokens";
 
 export type TokenErrorType = null | {
 	line: number;
