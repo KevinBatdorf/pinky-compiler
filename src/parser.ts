@@ -12,7 +12,7 @@ import { symbolForTokenType, type Token, type TokenType } from "./tokens";
 
 type ParserState = { tokens: Token[]; current: number };
 export type AST = Program;
-class ParseError extends Error {
+export class ParseError extends Error {
 	body: Program;
 	line: number;
 	column: number;

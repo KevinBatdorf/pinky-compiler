@@ -12,6 +12,7 @@ import {
 	lookahead,
 	match,
 	peek,
+	TokenError,
 } from "./lexer";
 
 test("isAlpha", () => {
@@ -420,11 +421,7 @@ test("should error on invalid input", () => {
 		{ type: "RPAREN", value: ")", start: 10, end: 11, column: 11, line: 1 },
 		{ type: "EOF", value: "", start: 11, end: 11, column: 12, line: 1 },
 	]);
-	expect(error).toEqual({
-		line: 1,
-		column: 12,
-		message: "Unexpected character ':'",
-	});
+	expect(error).toEqual(new TokenError("Unexpected character ':'", 1, 12));
 });
 
 test("should tokenize >= and <=", () => {
