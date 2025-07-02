@@ -1,0 +1,21 @@
+{
+	"name": "pinky-compiler",
+	"version": "1.0.0",
+	"description": "A compiler for the pinky scripting language",
+	"main": "dist/index.js",
+	"scripts": {
+		"lint": "biome lint --write",
+		"format": "biome format --write",
+		"test": "vitest"
+	},
+	"author": "",
+	"license": "MIT",
+	"devDependencies": {
+		"@biomejs/biome": "^2.0.6",
+		"@types/node": "^24.0.10",
+		"@vitest/ui": "^3.2.4",
+		"tsx": "^4.20.3",
+		"typescript": "^5.8.3",
+		"vitest": "^3.2.4"
+	}
+}
