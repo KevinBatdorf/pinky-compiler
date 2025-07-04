@@ -78,9 +78,9 @@ You can also use the lower-level building blocks:
 ```ts
 import { tokenize, parse, compile, init } from "pinky-compiler";
 
-const { tokens } = tokenize('println "hi"');
-const { ast } = parse(tokens);
-const { bytes } = compile(ast);
+const { tokens, error } = tokenize('println "hi"');
+const { ast, error } = parse(tokens);
+const { bytes, error } = compile(ast);
 const { run } = await init();
 run(bytes);
 ```
@@ -103,4 +103,4 @@ import type {
 } from "pinky-compiler";
 ```
 
-Additionally, you can import the syntax types listed [here](https://github.com/KevinBatdorf/pinky-compiler/blob/main/src/index.ts).
+Additionally, you can import the syntax types listed [here](https://github.com/KevinBatdorf/pinky-compiler/blob/main/src/syntax.ts).
