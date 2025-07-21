@@ -11,6 +11,7 @@ import {
 	misc,
 	unsignedLEB,
 	valType,
+	wat,
 } from "./wasm";
 
 // Set up function signatures
@@ -118,403 +119,403 @@ export const getFunctionReturnCount = (name: string): number => {
 };
 
 // js/lua style modulus
-const modFunctionBody = [
-	...local.declare(),
-	...local.get(0), // 0 (left)
-	...local.get(1), // 1 (right)
-	...local.get(0), // 0 (left)
-	...local.get(1), // 1 (right)
-	...f64.div(),
-	...f64.trunc(), // trunc to integer
-	...f64.mul(), // multiply by right
-	...f64.sub(), // subtract -> yields a - b * floor(a/b)
-	...fn.end(),
-];
+const modFunctionBody = wat(
+	local.declare(),
+	local.get(0), // 0 (left)
+	local.get(1), // 1 (right)
+	local.get(0), // 0 (left)
+	local.get(1), // 1 (right)
+	f64.div(),
+	f64.trunc(), // trunc to integer
+	f64.mul(), // multiply by right
+	f64.sub(), // subtract -> yields a - b * floor(a/b)
+	fn.end(),
+);
 
-const isStringFunctionBody: number[] = [
+const isStringFunctionBody = wat(
 	// param: pointer to the boxed value
-	...local.declare(),
-	...local.get(0),
-	...i32.load(0),
-	...i32.const(2), // is it tag 2 (string)?
-	...i32.eq(),
-	...fn.end(),
-];
+	local.declare(),
+	local.get(0),
+	i32.load(0),
+	i32.const(2), // is it tag 2 (string)?
+	i32.eq(),
+	fn.end(),
+);
 
-const isBooleanFunctionBody: number[] = [
+const isBooleanFunctionBody = wat(
 	// param: pointer to the boxed value
-	...local.declare(),
-	...local.get(0),
-	...i32.load(0),
-	...i32.const(3), // is it tag 3 (boolean)?
-	...i32.eq(),
-	...fn.end(),
-];
+	local.declare(),
+	local.get(0),
+	i32.load(0),
+	i32.const(3), // is it tag 3 (boolean)?
+	i32.eq(),
+	fn.end(),
+);
 
 // biome-ignore format: keep loop structure
-const memoryCopyFunctionBody: number[] = [
-	// params: from (0), to (1), len (2)
-	...local.declare("i32", "i32"), // i, current byte
-	...i32.const(0), // i = 0
-	...local.set(3),
+const memoryCopyFunctionBody = wat(
+    // params: from (0), to (1), len (2)
+    local.declare("i32", "i32"), // i, current byte
+    i32.const(0), // i = 0
+    local.set(3),
 
-	...block.start(),
-	...loop.start(),
-        ...local.get(3),
-        ...local.get(2),
-        ...i32.ge_s(), // i >= len ?
-        ...loop.br_if(1),
+    block.start(),
+    loop.start(),
+        local.get(3),
+        local.get(2),
+        i32.ge_s(), // i >= len ?
+        loop.br_if(1),
 
-        ...local.get(0),
-        ...local.get(3),
-        ...i32.add(),
-        ...i32.load8_u(), // ptr @ from + i
-        ...local.set(4), // current byte
+        local.get(0),
+        local.get(3),
+        i32.add(),
+        i32.load8_u(), // ptr @ from + i
+        local.set(4), // current byte
 
-        ...local.get(1),
-        ...local.get(3),
-        ...i32.add(),
-        ...local.get(4), // current byte
-        ...i32.store8(), // ptr @ to + i
+        local.get(1),
+        local.get(3),
+        i32.add(),
+        local.get(4), // current byte
+        i32.store8(), // ptr @ to + i
 
-        ...local.get(3),
-        ...i32.const(1),
-        ...i32.add(),
-        ...local.set(3), // i++
+        local.get(3),
+        i32.const(1),
+        i32.add(),
+        local.set(3), // i++
 
-        ...loop.br(0), // loop back
-	...loop.end(),
-	...block.end(),
-	...fn.end(),
-];
+        loop.br(0), // loop back
+    loop.end(),
+    block.end(),
+    fn.end(),
+);
 
-const concatFunctionBody: number[] = [
+const concatFunctionBody = wat(
 	// incoming params: left (0), right (1) - i32 boxed unknowns
-	...local.declare("i32", "i32", "i32", "i32", "i32"),
+	local.declare("i32", "i32", "i32", "i32", "i32"),
 
-	...i32.const(16),
-	...fn.call(func().ensure_space),
+	i32.const(16),
+	fn.call(func().ensure_space),
 
 	// 0 = left
-	...local.get(0),
-	...fn.call(func().to_string), // JS import
-	...local.set(0),
+	local.get(0),
+	fn.call(func().to_string), // JS import
+	local.set(0),
 
 	// 1 = right
-	...local.get(1),
-	...fn.call(func().to_string),
-	...local.set(1),
+	local.get(1),
+	fn.call(func().to_string),
+	local.set(1),
 
 	// 2 = leftOffset
-	...local.get(0),
-	...i32.const(4),
-	...i32.add(),
-	...i32.load(),
-	...local.set(2),
+	local.get(0),
+	i32.const(4),
+	i32.add(),
+	i32.load(),
+	local.set(2),
 
 	// 3 = leftLength
-	...local.get(0),
-	...i32.const(8),
-	...i32.add(),
-	...i32.load(),
-	...local.set(3),
+	local.get(0),
+	i32.const(8),
+	i32.add(),
+	i32.load(),
+	local.set(3),
 
 	// 4 = rightOffset
-	...local.get(1),
-	...i32.const(4),
-	...i32.add(),
-	...i32.load(),
-	...local.set(4),
+	local.get(1),
+	i32.const(4),
+	i32.add(),
+	i32.load(),
+	local.set(4),
 
 	// 5 = rightLength
-	...local.get(1),
-	...i32.const(8),
-	...i32.add(),
-	...i32.load(),
-	...local.set(5),
+	local.get(1),
+	i32.const(8),
+	i32.add(),
+	i32.load(),
+	local.set(5),
 
 	// 6 = resultOffset
-	...global.get(0), // global heap ptr
-	...local.set(6),
+	global.get(0), // global heap ptr
+	local.set(6),
 
 	// copy left
-	...local.get(2), // left offset (from)
-	...local.get(6), // end of heap (to)
-	...local.get(3), // left length (len)
-	...fn.call(func().memory_copy),
+	local.get(2), // left offset (from)
+	local.get(6), // end of heap (to)
+	local.get(3), // left length (len)
+	fn.call(func().memory_copy),
 
 	// copy right
-	...local.get(4), // right offset (from)
-	...local.get(6), // end of heap before left
-	...local.get(3), // left length
-	...i32.add(), // get new end of heap (to)
-	...local.get(5), // right length (len)
-	...fn.call(func().memory_copy),
+	local.get(4), // right offset (from)
+	local.get(6), // end of heap before left
+	local.get(3), // left length
+	i32.add(), // get new end of heap (to)
+	local.get(5), // right length (len)
+	fn.call(func().memory_copy),
 
 	// update heap pointer
-	...global.get(0),
-	...local.get(3),
-	...local.get(5),
-	...i32.add(),
-	...i32.add(),
-	...global.set(0),
+	global.get(0),
+	local.get(3),
+	local.get(5),
+	i32.add(),
+	i32.add(),
+	global.set(0),
 
 	// return new string
-	...local.get(6),
-	...local.get(3),
-	...local.get(5),
-	...i32.add(),
-	...fn.call(func().box_string),
+	local.get(6),
+	local.get(3),
+	local.get(5),
+	i32.add(),
+	fn.call(func().box_string),
 
-	...fn.end(),
-];
+	fn.end(),
+);
 
 // biome-ignore format: keep if structure
-const toNumberFunctionBody: number[] = [
-	// incoming param: a pointer to a boxed value
-	...local.declare(),
-	...local.get(0),
-	...i32.load(0), // load tag
+const toNumberFunctionBody = wat(
+    // incoming param: a pointer to a boxed value
+    local.declare(),
+    local.get(0),
+    i32.load(0), // load tag
 
-	...i32.const(1),
-	...i32.eq(),
-	// tag == 1 (number)?
-	...if_.start(valType("f64")),
-        ...local.get(0),
-        ...i32.const(8),
-        ...i32.add(),
-        ...f64.load(0),
-	...if_.else(),
-        ...local.get(0),
-        ...i32.load(0), // reload tag
-        ...i32.const(3),
-        ...i32.eq(),
+    i32.const(1),
+    i32.eq(),
+    // tag == 1 (number)?
+    if_.start(valType("f64")),
+        local.get(0),
+        i32.const(8),
+        i32.add(),
+        f64.load(0),
+    if_.else(),
+        local.get(0),
+        i32.load(0), // reload tag
+        i32.const(3),
+        i32.eq(),
         // tag == 3 (bool)?
-        ...if_.start(valType("f64")),
-            ...local.get(0),
-            ...i32.const(4),
-            ...i32.add(),
-            ...i32.load(0),
-            ...f64.convert_i32_s(),
-        ...if_.else(),
-            ...local.get(0),
-            ...i32.load(0), // reload tag
-            ...i32.const(2),
-            ...i32.eq(),
+        if_.start(valType("f64")),
+            local.get(0),
+            i32.const(4),
+            i32.add(),
+            i32.load(0),
+            f64.convert_i32_s(),
+        if_.else(),
+            local.get(0),
+            i32.load(0), // reload tag
+            i32.const(2),
+            i32.eq(),
             // tag == 2 (string)?
-            ...if_.start(valType("f64")),
+            if_.start(valType("f64")),
                 // strings → NaN
-                ...f64.const(Number.NaN),
-            ...if_.else(),
+                f64.const(Number.NaN),
+            if_.else(),
                 // tag == 0 (null)
-                ...f64.const(0),
-	        ...if_.end(), // string
-	    ...if_.end(), // bool
-	...if_.end(), // number
-	...fn.call(func().box_number),
-	...fn.end(),
-];
+                f64.const(0),
+            if_.end(), // string
+        if_.end(), // bool
+    if_.end(), // number
+    fn.call(func().box_number),
+    fn.end(),
+);
 
 // biome-ignore format: keep if structure
-const isTruthyFunctionBody: number[] = [
-	// incoming param: a pointer to a boxed value
-	...local.declare(),
-	...local.get(0), // load tag
-	...i32.load(0),
+const isTruthyFunctionBody = wat(
+    // incoming param: a pointer to a boxed value
+    local.declare(),
+    local.get(0), // load tag
+    i32.load(0),
 
-	// if tag == 1 (number)
-	...i32.const(1),
-	...i32.eq(),
-	...if_.start(valType("i32")), // if (result i32)
-        ...local.get(0),
-        ...i32.const(8),
-        ...i32.add(), // offset + 8
-        ...f64.load(0),
-        ...f64.const(0),
-        ...f64.ne(), // (number != 0)
-	...if_.else(),
-        ...local.get(0),
-        ...i32.load(0), // load tag again
+    // if tag == 1 (number)
+    i32.const(1),
+    i32.eq(),
+    if_.start(valType("i32")), // if (result i32)
+        local.get(0),
+        i32.const(8),
+        i32.add(), // offset + 8
+        f64.load(0),
+        f64.const(0),
+        f64.ne(), // (number != 0)
+    if_.else(),
+        local.get(0),
+        i32.load(0), // load tag again
         // if tag == 3 (bool)
-        ...i32.const(3),
-        ...i32.eq(),
-        ...if_.start(valType("i32")), // if (result i32)
-            ...local.get(0),
-            ...i32.const(4),
-            ...i32.add(), // offset + 4
-            ...i32.load(0),
-        ...if_.else(),
-            ...local.get(0),
-            ...i32.load(0), // load tag again
-            ...i32.const(2),
-            ...i32.eq(),
-            ...if_.start(valType("i32")), // if (result i32)
-                ...local.get(0),
-                ...i32.const(8),
-                ...i32.add(),
-                ...i32.load(0),
-                ...i32.const(0),
-                ...i32.ne(), // (length > 0)
-	        ...if_.else(),
+        i32.const(3),
+        i32.eq(),
+        if_.start(valType("i32")), // if (result i32)
+            local.get(0),
+            i32.const(4),
+            i32.add(), // offset + 4
+            i32.load(0),
+        if_.else(),
+            local.get(0),
+            i32.load(0), // load tag again
+            i32.const(2),
+            i32.eq(),
+            if_.start(valType("i32")), // if (result i32)
+                local.get(0),
+                i32.const(8),
+                i32.add(),
+                i32.load(0),
+                i32.const(0),
+                i32.ne(), // (length > 0)
+            if_.else(),
                 // falsy fallback
-                ...i32.const(0), // return 0 (falsy)
-	        ...if_.end(), // end string
-	    ...if_.end(), // end bool
-	...if_.end(), // end number
-	...fn.end(),
-];
+                i32.const(0), // return 0 (falsy)
+            if_.end(), // end string
+        if_.end(), // end bool
+    if_.end(), // end number
+    fn.end(),
+);
 
 // biome-ignore format: keep if structure
-const ensureSpaceFunctionBody = [
-	// param: i32 sizeNeeded
-	...local.declare("i32"), // currentPtr
-	// currentPtr = global heap ptr
-	...global.get(0),
-	...local.set(1),
+const ensureSpaceFunctionBody = wat(
+    // param: i32 sizeNeeded
+    local.declare("i32"), // currentPtr
+    // currentPtr = global heap ptr
+    global.get(0),
+    local.set(1),
 
-	// Check if (currentPtr + sizeNeeded) > memory.size * 65536
-	...local.get(1),
-	...local.get(0),
-	...i32.add(),
+    // Check if (currentPtr + sizeNeeded) > memory.size * 65536
+    local.get(1),
+    local.get(0),
+    i32.add(),
 
-	...memory.size(),
-	...i32.const(16),
-	...i32.shl(),
+    memory.size(),
+    i32.const(16),
+    i32.shl(),
 
-	...i32.gt_u(),
-	...if_.start(),
+    i32.gt_u(),
+    if_.start(),
         // ceil(sizeNeeded / 65536)
-        ...local.get(0),
-        ...i32.const(65536 - 1),
-        ...i32.add(),
-        ...i32.const(16),
-        ...i32.shr_u(),
-        ...memory.grow(),
-        ...misc.drop(),
-	...if_.end(),
-	...fn.end(),
-];
+        local.get(0),
+        i32.const(65536 - 1),
+        i32.add(),
+        i32.const(16),
+        i32.shr_u(),
+        memory.grow(),
+        misc.drop(),
+    if_.end(),
+    fn.end(),
+);
 
 // To make this easier, everything is boxed as i32
-const boxNumberFunctionBody = [
+const boxNumberFunctionBody = wat(
 	// incoming param: f64 value
-	...local.declare("i32"), // temp_ptr
+	local.declare("i32"), // temp_ptr
 
-	...i32.const(16),
-	...fn.call(func().ensure_space),
+	i32.const(16),
+	fn.call(func().ensure_space),
 
 	// temp_ptr = heap_ptr
-	...global.get(0),
-	...local.set(1), // local[1] = temp_ptr
+	global.get(0),
+	local.set(1), // local[1] = temp_ptr
 
 	// store tag = 1 (number) at temp_ptr
-	...local.get(1),
-	...i32.const(1),
-	...i32.store(0), // offset = 0
+	local.get(1),
+	i32.const(1),
+	i32.store(0), // offset = 0
 
 	// store f64 at temp_ptr + 8
-	...local.get(1),
-	...i32.const(8),
-	...i32.add(),
-	...local.get(0), // f64 param
-	...f64.store(0), // offset = 0
+	local.get(1),
+	i32.const(8),
+	i32.add(),
+	local.get(0), // f64 param
+	f64.store(0), // offset = 0
 
 	// heap_ptr += 16
-	...global.setFromOffset(16),
+	global.setFromOffset(16),
 
 	// return temp_ptr
-	...local.get(1),
-	...fn.end(),
-];
+	local.get(1),
+	fn.end(),
+);
 
-const unboxNumberFunctionBody = [
+const unboxNumberFunctionBody = wat(
 	// incoming param: pointer to boxed value
-	...local.declare(),
-	...local.get(0),
-	...i32.const(8),
-	...i32.add(),
-	...f64.load(0), // align = 8, offset = 0
-	...fn.end(),
-];
+	local.declare(),
+	local.get(0),
+	i32.const(8),
+	i32.add(),
+	f64.load(0), // align = 8, offset = 0
+	fn.end(),
+);
 
-const boxStringFunctionBody = [
+const boxStringFunctionBody = wat(
 	// two incoming params: string offset (i32) and length (i32)
-	...local.declare("i32"), // declare temp_ptr
-	...i32.const(16),
-	...fn.call(func().ensure_space),
+	local.declare("i32"), // declare temp_ptr
+	i32.const(16),
+	fn.call(func().ensure_space),
 	// temp_ptr = heap_ptr
-	...global.get(0),
-	...local.set(2), // temp_ptr
+	global.get(0),
+	local.set(2), // temp_ptr
 
 	// store tag = 2 at (temp_ptr)
-	...local.get(2),
-	...i32.const(2),
-	...i32.store(0), // offset = 0
+	local.get(2),
+	i32.const(2),
+	i32.store(0), // offset = 0
 
 	// store offset param at (temp_ptr + 4)
-	...local.get(2),
-	...i32.const(4),
-	...i32.add(),
-	...local.get(0),
-	...i32.store(0), // offset = 0
+	local.get(2),
+	i32.const(4),
+	i32.add(),
+	local.get(0),
+	i32.store(0), // offset = 0
 
 	// store length param at (temp_ptr + 8)
-	...local.get(2),
-	...i32.const(8),
-	...i32.add(),
-	...local.get(1),
-	...i32.store(0), // offset = 0
+	local.get(2),
+	i32.const(8),
+	i32.add(),
+	local.get(1),
+	i32.store(0), // offset = 0
 
 	// heap_ptr += 16
-	...global.setFromOffset(16),
+	global.setFromOffset(16),
 
 	// return temp_ptr
-	...local.get(2),
-	...fn.end(),
-];
+	local.get(2),
+	fn.end(),
+);
 
-const boxBooleanFunctionBody = [
+const boxBooleanFunctionBody = wat(
 	// incoming param: boolean value (i32)
-	...local.declare("i32"), // temp_ptr
-	...i32.const(16),
-	...fn.call(func().ensure_space),
+	local.declare("i32"), // temp_ptr
+	i32.const(16),
+	fn.call(func().ensure_space),
 	// temp_ptr = heap_ptr
-	...global.get(0),
-	...local.set(1),
+	global.get(0),
+	local.set(1),
 
 	// store tag = 3 (boolean)
-	...local.get(1),
-	...i32.const(3),
-	...i32.store(0), // offset = 0
+	local.get(1),
+	i32.const(3),
+	i32.store(0), // offset = 0
 
 	// store boolean value at temp_ptr + 4
-	...local.get(1),
-	...i32.const(4),
-	...i32.add(),
-	...local.get(0),
-	...i32.store(0), // offset = 0
+	local.get(1),
+	i32.const(4),
+	i32.add(),
+	local.get(0),
+	i32.store(0), // offset = 0
 
 	// heap_ptr += 16
-	...global.setFromOffset(16),
+	global.setFromOffset(16),
 
 	// return temp_ptr
-	...local.get(1),
-	...fn.end(),
-];
+	local.get(1),
+	fn.end(),
+);
 
-const boxNilFunctionBody = [
+const boxNilFunctionBody = wat(
 	// no incoming params
-	...local.declare(),
-	...global.get(0),
-	...i32.const(0), // nil tag
-	...i32.store(),
-	...global.setFromOffset(16), // increment heap pointer
-	...global.get(0),
-	...fn.end(),
-];
+	local.declare(),
+	global.get(0),
+	i32.const(0), // nil tag
+	i32.store(),
+	global.setFromOffset(16), // increment heap pointer
+	global.get(0),
+	fn.end(),
+);
 
-const builtInFuncBodies: Record<string, number[]> = {
-	main: [], // main is defined later
+const builtInFuncBodies: Record<string, Uint8Array> = {
+	main: new Uint8Array(), // main is defined later
 	mod: modFunctionBody,
 	is_truthy: isTruthyFunctionBody,
 	is_string: isStringFunctionBody,
@@ -530,7 +531,7 @@ const builtInFuncBodies: Record<string, number[]> = {
 	ensure_space: ensureSpaceFunctionBody,
 };
 export let functionBodies = { ...builtInFuncBodies };
-export const addFunctionBody = (name: string, body: number[]): void => {
+export const addFunctionBody = (name: string, body: Uint8Array): void => {
 	functionBodies[name] = body;
 };
 export const resetFunctionBodies = (): void => {
