@@ -154,39 +154,39 @@ const isBooleanFunctionBody = wat(
 
 // biome-ignore format: keep loop structure
 const memoryCopyFunctionBody = wat(
-    // params: from (0), to (1), len (2)
-    local.declare("i32", "i32"), // i, current byte
-    i32.const(0), // i = 0
-    local.set(3),
+	// params: from (0), to (1), len (2)
+	local.declare("i32", "i32"), // i, current byte
+	i32.const(0), // i = 0
+	local.set(3),
 
-    block.start(),
-    loop.start(),
-        local.get(3),
-        local.get(2),
-        i32.ge_s(), // i >= len ?
-        loop.br_if(1),
+	block.start(),
+	loop.start(),
+		local.get(3),
+		local.get(2),
+		i32.ge_s(), // i >= len ?
+		loop.br_if(1),
 
-        local.get(0),
-        local.get(3),
-        i32.add(),
-        i32.load8_u(), // ptr @ from + i
-        local.set(4), // current byte
+		local.get(0),
+		local.get(3),
+		i32.add(),
+		i32.load8_u(), // ptr @ from + i
+		local.set(4), // current byte
 
-        local.get(1),
-        local.get(3),
-        i32.add(),
-        local.get(4), // current byte
-        i32.store8(), // ptr @ to + i
+		local.get(1),
+		local.get(3),
+		i32.add(),
+		local.get(4), // current byte
+		i32.store8(), // ptr @ to + i
 
-        local.get(3),
-        i32.const(1),
-        i32.add(),
-        local.set(3), // i++
+		local.get(3),
+		i32.const(1),
+		i32.add(),
+		local.set(3), // i++
 
-        loop.br(0), // loop back
-    loop.end(),
-    block.end(),
-    fn.end(),
+		loop.br(0), // loop back
+	loop.end(),
+	block.end(),
+	fn.end(),
 );
 
 const concatFunctionBody = wat(
@@ -272,128 +272,128 @@ const concatFunctionBody = wat(
 
 // biome-ignore format: keep if structure
 const toNumberFunctionBody = wat(
-    // incoming param: a pointer to a boxed value
-    local.declare(),
-    local.get(0),
-    i32.load(0), // load tag
+	// incoming param: a pointer to a boxed value
+	local.declare(),
+	local.get(0),
+	i32.load(0), // load tag
 
-    i32.const(1),
-    i32.eq(),
-    // tag == 1 (number)?
-    if_.start(valType("f64")),
-        local.get(0),
-        i32.const(8),
-        i32.add(),
-        f64.load(0),
-    if_.else(),
-        local.get(0),
-        i32.load(0), // reload tag
-        i32.const(3),
-        i32.eq(),
-        // tag == 3 (bool)?
-        if_.start(valType("f64")),
-            local.get(0),
-            i32.const(4),
-            i32.add(),
-            i32.load(0),
-            f64.convert_i32_s(),
-        if_.else(),
-            local.get(0),
-            i32.load(0), // reload tag
-            i32.const(2),
-            i32.eq(),
-            // tag == 2 (string)?
-            if_.start(valType("f64")),
-                // strings → NaN
-                f64.const(Number.NaN),
-            if_.else(),
-                // tag == 0 (null)
-                f64.const(0),
-            if_.end(), // string
-        if_.end(), // bool
-    if_.end(), // number
-    fn.call(func().box_number),
-    fn.end(),
+	i32.const(1),
+	i32.eq(),
+	// tag == 1 (number)?
+	if_.start(valType("f64")),
+		local.get(0),
+		i32.const(8),
+		i32.add(),
+		f64.load(0),
+	if_.else(),
+		local.get(0),
+		i32.load(0), // reload tag
+		i32.const(3),
+		i32.eq(),
+		// tag == 3 (bool)?
+		if_.start(valType("f64")),
+			local.get(0),
+			i32.const(4),
+			i32.add(),
+			i32.load(0),
+			f64.convert_i32_s(),
+		if_.else(),
+			local.get(0),
+			i32.load(0), // reload tag
+			i32.const(2),
+			i32.eq(),
+			// tag == 2 (string)?
+			if_.start(valType("f64")),
+				// strings → NaN
+				f64.const(Number.NaN),
+			if_.else(),
+				// tag == 0 (null)
+				f64.const(0),
+			if_.end(), // string
+		if_.end(), // bool
+	if_.end(), // number
+	fn.call(func().box_number),
+	fn.end(),
 );
 
 // biome-ignore format: keep if structure
 const isTruthyFunctionBody = wat(
-    // incoming param: a pointer to a boxed value
-    local.declare(),
-    local.get(0), // load tag
-    i32.load(0),
+	// incoming param: a pointer to a boxed value
+	local.declare(),
+	local.get(0), // load tag
+	i32.load(0),
 
-    // if tag == 1 (number)
-    i32.const(1),
-    i32.eq(),
-    if_.start(valType("i32")), // if (result i32)
-        local.get(0),
-        i32.const(8),
-        i32.add(), // offset + 8
-        f64.load(0),
-        f64.const(0),
-        f64.ne(), // (number != 0)
-    if_.else(),
-        local.get(0),
-        i32.load(0), // load tag again
-        // if tag == 3 (bool)
-        i32.const(3),
-        i32.eq(),
-        if_.start(valType("i32")), // if (result i32)
-            local.get(0),
-            i32.const(4),
-            i32.add(), // offset + 4
-            i32.load(0),
-        if_.else(),
-            local.get(0),
-            i32.load(0), // load tag again
-            i32.const(2),
-            i32.eq(),
-            if_.start(valType("i32")), // if (result i32)
-                local.get(0),
-                i32.const(8),
-                i32.add(),
-                i32.load(0),
-                i32.const(0),
-                i32.ne(), // (length > 0)
-            if_.else(),
-                // falsy fallback
-                i32.const(0), // return 0 (falsy)
-            if_.end(), // end string
-        if_.end(), // end bool
-    if_.end(), // end number
-    fn.end(),
+	// if tag == 1 (number)
+	i32.const(1),
+	i32.eq(),
+	if_.start(valType("i32")), // if (result i32)
+		local.get(0),
+		i32.const(8),
+		i32.add(), // offset + 8
+		f64.load(0),
+		f64.const(0),
+		f64.ne(), // (number != 0)
+	if_.else(),
+		local.get(0),
+		i32.load(0), // load tag again
+		// if tag == 3 (bool)
+		i32.const(3),
+		i32.eq(),
+		if_.start(valType("i32")), // if (result i32)
+			local.get(0),
+			i32.const(4),
+			i32.add(), // offset + 4
+			i32.load(0),
+		if_.else(),
+			local.get(0),
+			i32.load(0), // load tag again
+			i32.const(2),
+			i32.eq(),
+			if_.start(valType("i32")), // if (result i32)
+				local.get(0),
+				i32.const(8),
+				i32.add(),
+				i32.load(0),
+				i32.const(0),
+				i32.ne(), // (length > 0)
+			if_.else(),
+				// falsy fallback
+				i32.const(0), // return 0 (falsy)
+			if_.end(), // end string
+		if_.end(), // end bool
+	if_.end(), // end number
+	fn.end(),
 );
 
 // biome-ignore format: keep if structure
 const ensureSpaceFunctionBody = wat(
-    // param: i32 sizeNeeded
-    local.declare("i32"), // currentPtr
-    // currentPtr = global heap ptr
-    global.get(0),
-    local.set(1),
+	// param: i32 sizeNeeded
+	local.declare("i32"), // currentPtr
+	// currentPtr = global heap ptr
+	global.get(0),
+	local.set(1),
 
-    // Check if (currentPtr + sizeNeeded) > memory.size * 65536
-    local.get(1),
-    local.get(0),
-    i32.add(),
+	// Check if (currentPtr + sizeNeeded) > memory.size * 65536
+	local.get(1),
+	local.get(0),
+	i32.add(),
 
-    memory.size(),
-    i32.const(16),
-    i32.shl(),
+	memory.size(),
+	i32.const(16),
+	i32.shl(),
 
-    i32.gt_u(),
-    if_.start(),
-        // ceil(sizeNeeded / 65536)
-        local.get(0),
-        i32.const(65536 - 1),
-        i32.add(),
-        i32.const(16),
-        i32.shr_u(),
-        memory.grow(),
-        misc.drop(),
-    if_.end(),
-    fn.end(),
+	i32.gt_u(),
+	if_.start(),
+		// ceil(sizeNeeded / 65536)
+		local.get(0),
+		i32.const(65536 - 1),
+		i32.add(),
+		i32.const(16),
+		i32.shr_u(),
+		memory.grow(),
+		misc.drop(),
+	if_.end(),
+	fn.end(),
 );
 
 // To make this easier, everything is boxed as i32

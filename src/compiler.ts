@@ -354,33 +354,33 @@ const compileStatement = (
 
 			// biome-ignore format: keep loop structure
 			return wat(
-                // Start counter at 0
-                i32.const(0),
-                local.set(counterIndex),
-                block.start(),
-                loop.start(),
-                    // check if we reached max iterations
-                    local.get(counterIndex),
-                    i32.const(MAX_ITERATIONS),
-                    i32.ge_u(),
-                    if_.start(), // counter >= maxIters
-                        misc.unreachable(), // infinite loop, throw error
-                    if_.end(),
-                    local.get(counterIndex),
-                    i32.const(1),
-                    i32.add(), // increment counter
-                    local.set(counterIndex),
+				// Start counter at 0
+				i32.const(0),
+				local.set(counterIndex),
+				block.start(),
+				loop.start(),
+					// check if we reached max iterations
+					local.get(counterIndex),
+					i32.const(MAX_ITERATIONS),
+					i32.ge_u(),
+					if_.start(), // counter >= maxIters
+						misc.unreachable(), // infinite loop, throw error
+					if_.end(),
+					local.get(counterIndex),
+					i32.const(1),
+					i32.add(), // increment counter
+					local.set(counterIndex),
 
-                    condition,
-                    fn.call(func().is_truthy),
-                    i32.eqz(), // check if condition is false
-                    loop.br_if(1), // break out of outer block
+					condition,
+					fn.call(func().is_truthy),
+					i32.eqz(), // check if condition is false
+					loop.br_if(1), // break out of outer block
 
-                    body,
-                    loop.br(0), // loop back
-                loop.end(),
-                block.end(),
-            );
+					body,
+					loop.br(0), // loop back
+				loop.end(),
+				block.end(),
+			);
 		}
 		case "ForStatement": {
 			const { assignment, condition, increment, body } = stmt;
@@ -407,62 +407,62 @@ const compileStatement = (
 			const counterIndex = consumeScratchIndex();
 			// biome-ignore format: keep loop structure
 			return wat(
-                // Start counter at 0
-                i32.const(0),
-                local.set(counterIndex),
+				// Start counter at 0
+				i32.const(0),
+				local.set(counterIndex),
 
-                init, // e.g. i := 0
-                step,
-                fn.call(func().unbox_number),
-                f64.const(0),
-                f64.lt(), // step < 0 ?
-                local.set(isDescending),
+				init, // e.g. i := 0
+				step,
+				fn.call(func().unbox_number),
+				f64.const(0),
+				f64.lt(), // step < 0 ?
+				local.set(isDescending),
 
-                block.start(),
-                loop.start(),
-                    // check if we reached max iterations
-                    local.get(counterIndex),
-                    i32.const(MAX_ITERATIONS),
-                    i32.ge_u(),
-                    if_.start(), // counter >= maxIters
-                        misc.unreachable(), // infinite loop, throw error
-                    if_.end(),
-                    local.get(counterIndex),
-                    i32.const(1),
-                    i32.add(), // increment counter
-                    local.set(counterIndex),
+				block.start(),
+				loop.start(),
+					// check if we reached max iterations
+					local.get(counterIndex),
+					i32.const(MAX_ITERATIONS),
+					i32.ge_u(),
+					if_.start(), // counter >= maxIters
+						misc.unreachable(), // infinite loop, throw error
+					if_.end(),
+					local.get(counterIndex),
+					i32.const(1),
+					i32.add(), // increment counter
+					local.set(counterIndex),
 
-                    local.get(isDescending),
-                    if_.start(valType("i32")), // descending case
-                        local.get(loopVar.index),
-                        fn.call(func().unbox_number),
-                        cond,
-                        fn.call(func().unbox_number),
-                        f64.lt(), // i < cond ? 1 : 0
-                    if_.else(), // ascending case
-                        local.get(loopVar.index),
-                        fn.call(func().unbox_number),
-                        cond,
-                        fn.call(func().unbox_number),
-                        f64.gt(), // i > cond ? 1 : 0
-                    if_.end(),
-                    loop.br_if(1), // exit if 1
+					local.get(isDescending),
+					if_.start(valType("i32")), // descending case
+						local.get(loopVar.index),
+						fn.call(func().unbox_number),
+						cond,
+						fn.call(func().unbox_number),
+						f64.lt(), // i < cond ? 1 : 0
+					if_.else(), // ascending case
+						local.get(loopVar.index),
+						fn.call(func().unbox_number),
+						cond,
+						fn.call(func().unbox_number),
+						f64.gt(), // i > cond ? 1 : 0
+					if_.end(),
+					loop.br_if(1), // exit if 1
 
-                    loopBody,
+					loopBody,
 
-                    // increment the loop variable
-                    local.get(loopVar.index),
-                    fn.call(func().unbox_number),
-                    step,
-                    fn.call(func().unbox_number),
-                    f64.add(),
-                    fn.call(func().box_number),
-                    local.set(loopVar.index),
+					// increment the loop variable
+					local.get(loopVar.index),
+					fn.call(func().unbox_number),
+					step,
+					fn.call(func().unbox_number),
+					f64.add(),
+					fn.call(func().box_number),
+					local.set(loopVar.index),
 
-                    loop.br(0), // loop back
-                loop.end(),
-                block.end(),
-            );
+					loop.br(0), // loop back
+				loop.end(),
+				block.end(),
+			);
 		}
 		case "FunctionDeclStatement": {
 			const { name, params, body } = stmt;
@@ -556,40 +556,40 @@ const compileExpression = (
 			if (nativeOp && expr.operator === "+") {
 				// biome-ignore format: keep if structure
 				return wat(
-                    left,
-                    fn.call(func().is_string),
-                    right,
-                    fn.call(func().is_string),
-                    i32.or(), // is_string(left) || is_string(right)
-                    if_.start(valType("i32")),
-                        left,
-                        right,
-                        fn.call(func().concat),
-                    if_.else(),
-                        left,
-                        fn.call(func().is_bool),
-                        right,
-                        fn.call(func().is_bool),
-                        i32.or(),
-                        if_.start(valType("i32")), // is_bool(left) || is_bool(right)
-                            left,
-                            fn.call(func().to_number),
-                            fn.call(func().unbox_number),
-                            right,
-                            fn.call(func().to_number),
-                            fn.call(func().unbox_number),
-                            f64.add(),
-                            fn.call(func().box_number),
-                        if_.else(), // just add them otherwise
-                            left,
-                            fn.call(func().unbox_number),
-                            right,
-                            fn.call(func().unbox_number),
-                            f64.add(),
-                            fn.call(func().box_number),
-                        if_.end(), // bool
-                    if_.end(), // string
-                );
+					left,
+					fn.call(func().is_string),
+					right,
+					fn.call(func().is_string),
+					i32.or(), // is_string(left) || is_string(right)
+					if_.start(valType("i32")),
+						left,
+						right,
+						fn.call(func().concat),
+					if_.else(),
+						left,
+						fn.call(func().is_bool),
+						right,
+						fn.call(func().is_bool),
+						i32.or(),
+						if_.start(valType("i32")), // is_bool(left) || is_bool(right)
+							left,
+							fn.call(func().to_number),
+							fn.call(func().unbox_number),
+							right,
+							fn.call(func().to_number),
+							fn.call(func().unbox_number),
+							f64.add(),
+							fn.call(func().box_number),
+						if_.else(), // just add them otherwise
+							left,
+							fn.call(func().unbox_number),
+							right,
+							fn.call(func().unbox_number),
+							f64.add(),
+							fn.call(func().box_number),
+						if_.end(), // bool
+					if_.end(), // string
+				);
 			}
 
 			// Native operators supported for f64
@@ -633,31 +633,31 @@ const compileExpression = (
 					const scratch = consumeScratchIndex();
 					// biome-ignore format: keep if structure
 					return wat(
-                        left, // evaluate A
-                        local.set(scratch),
-                        local.get(scratch),
-                        fn.call(func().is_truthy),
-                        if_.start(valType("i32")),
-                            right, // evaluate and return B
-                        if_.else(),
-                            local.get(scratch), // return A
-                        if_.end(),
-                    );
+						left, // evaluate A
+						local.set(scratch),
+						local.get(scratch),
+						fn.call(func().is_truthy),
+						if_.start(valType("i32")),
+							right, // evaluate and return B
+						if_.else(),
+							local.get(scratch), // return A
+						if_.end(),
+					);
 				}
 				case "or": {
 					const scratch = consumeScratchIndex();
 					// biome-ignore format: keep if structure
 					return wat(
-                        left, // evaluate A
-                        local.set(scratch),
-                        local.get(scratch),
-                        fn.call(func().is_truthy),
-                        if_.start(valType("i32")),
-                            local.get(scratch), //return A
-                        if_.else(),
-                            right, // evaluate and return B
-                        if_.end(),
-                    );
+						left, // evaluate A
+						local.set(scratch),
+						local.get(scratch),
+						fn.call(func().is_truthy),
+						if_.start(valType("i32")),
+							local.get(scratch), //return A
+						if_.else(),
+							right, // evaluate and return B
+						if_.end(),
+					);
 				}
 				default:
 					throw new Error(`Unsupported binary operator: ${expr.operator}`);
