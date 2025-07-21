@@ -209,3 +209,12 @@ export const nativeBinOps = {
 	and: null,
 	or: null,
 } as const;
+
+export const wat = (
+	...params: (number | number[] | Uint8Array)[]
+): Uint8Array =>
+	new Uint8Array(
+		params.flatMap((p) =>
+			p instanceof Uint8Array ? Array.from(p) : Array.isArray(p) ? p : [p],
+		),
+	);
